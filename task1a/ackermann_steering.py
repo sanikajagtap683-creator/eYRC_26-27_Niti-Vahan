@@ -45,30 +45,31 @@ WHEEL_OFFSET = 0.0275       # O: distance between kingpin axis and wheel centre.
 
 
 def ackermann_wheel_angles(delta):
-    '''
-    Purpose:
-    ---
-    Convert a single virtual steering angle into the two real front-wheel
-    angles, per the Ackermann geometry.
-
-    Input Arguments:
-    ---
-    `delta` :   [ float ]
-        Steering angle of the virtual centred front wheel, in radians.
-
-    Returns:
-    ---
-    `left_angle`  : [ float ]
-    `right_angle` : [ float ]
-        The two real front-wheel steering angles, in radians, using the
-        same sign convention as delta.
-
-    REMEMBER:
-    ---
-    WHEEL_OFFSET changes the effective half-track width inside each wheel's triangle.
-    '''
-
-
+    # Agar steering seedha hai (angle zero hai)
+    if delta == 0:
+        return 0.0, 0.0
+    
+    # Effective track width calculation
+    w_eff = TRACK_WIDTH - (2 * WHEEL_OFFSET)
+    
+    # Formula components
+    cot_delta = 1.0 / math.tan(abs(delta))
+    factor = w_eff / (2.0 * WHEELBASE)
+    
+    cot_inside = cot_delta - factor
+    cot_outside = cot_delta + factor
+    
+    theta_inside = math.atan(1.0 / cot_inside)
+    theta_outside = math.atan(1.0 / cot_outside)
+    
+    # Left turn vs Right turn logic
+    if delta > 0:
+        left_angle = theta_inside
+        right_angle = theta_outside
+    else:
+        left_angle = -theta_outside
+        right_angle = -theta_inside
+        
     return left_angle, right_angle
 
 
